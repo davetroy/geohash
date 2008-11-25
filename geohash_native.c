@@ -30,6 +30,15 @@
 
 static VALUE rb_cGeoHash;
 
+/* Right, Left, Top, Bottom */
+
+static char *neighbors[] = { "bc01fg45238967deuvhjyznpkmstqrwx",
+														 "238967debc01fg45kmstqrwxuvhjyznp",
+														 "p0r21436x8zb9dcf5h7kjnmqesgutwvy",
+														 "14365h7k9dcfesgujnmqp0r2twvyx8zb" };
+												
+static char *borders[] = { "bcfguvyz", "0145hjnp", "prxz", "028b" };
+
 #define BASE32	"0123456789bcdefghjkmnpqrstuvwxyz"
 
 static void refine_interval(double *interval, char cd, char mask) {
@@ -170,12 +179,43 @@ static VALUE decode(VALUE self, VALUE str)
 	return ary;
 }
 
+void get_neighbor(char *str, int dir)
+{
+	char last_chr, *border, *neighbor;
+	int index = ((strlen(str) % 2) + dir) % 4;
+	neighbor = neighbors[index];
+	border = borders[index];
+	last_chr = str[strlen(str)-1];
+	printf("strlen(str)=%d, dir=%d, index=%d, str=%s, border=%s, neighbor=%s, last_chr=%c\n", strlen(str), dir, index, str, border, neighbor,last_chr);
+	if (strchr(border,last_chr)) {
+		printf("finding border for %c in %s\n", last_chr, border);
+		str[strlen(str)-1] = NULL;
+		get_neighbor(str, dir);
+	}
+	printf("replacing last character (%c) with new char (%c)\n", last_chr, BASE32[strchr(neighbor, last_chr)-neighbor]);
+	str[strlen(str)-1] = BASE32[strchr(neighbor, last_chr)-neighbor];
+}
+
+static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
+{
+	char *str;
+	VALUE ret_val;
+	Check_Type(geohash, T_STRING);
+	Check_Type(dir, T_FIXNUM);
+	str = RSTRING(geohash)->ptr;
+	if (!strlen(str)) return Qnil;
+	ret_val = rb_str_new(str,strlen(str));
+	get_neighbor(RSTRING(ret_val)->ptr, NUM2INT(dir));
+	return ret_val;
+}
+
 void Init_geohash_native()
 {
 	rb_cGeoHash = rb_define_class("GeoHash", rb_cObject);
 	rb_define_singleton_method(rb_cGeoHash, "decode_bbox", decode_bbox, 1);
 	rb_define_singleton_method(rb_cGeoHash, "decode_base", decode, 1);
 	rb_define_singleton_method(rb_cGeoHash, "encode_base", encode, 3);
+	rb_define_singleton_method(rb_cGeoHash, "calculate_adjacent", calculate_adjacent, 2);
 }
 
 // end

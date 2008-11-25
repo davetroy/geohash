@@ -11,17 +11,17 @@ class GeoHash
   
   VERSION = '1.1.0'
 
-  BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz";
+  BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz"
 
   @@neighbors = {:right  => { :even => "bc01fg45238967deuvhjyznpkmstqrwx" },
                  :left   => { :even => "238967debc01fg45kmstqrwxuvhjyznp" },
                  :top    => { :even => "p0r21436x8zb9dcf5h7kjnmqesgutwvy" },
-                 :bottom => { :even => "14365h7k9dcfesgujnmqp0r2twvyx8zb" } };
+                 :bottom => { :even => "14365h7k9dcfesgujnmqp0r2twvyx8zb" } }
 
   @@borders   = {:right  => { :even => "bcfguvyz" },
                  :left   => { :even => "0145hjnp" },
                  :top    => { :even => "prxz" },
-                 :bottom => { :even => "028b" } };
+                 :bottom => { :even => "028b" } }
                 
   @@neighbors[:bottom][:odd] = @@neighbors[:left][:even]
   @@neighbors[:top][:odd] = @@neighbors[:right][:even]
@@ -46,16 +46,16 @@ class GeoHash
     [lat.decimals(decimals), lon.decimals(decimals)]
   end
   
-  def self.calculate_adjacent(geohash, dir)
-    geohash.downcase!
-    last_chr = geohash[-1]
-    type = (geohash.size % 2).zero? ? :even : :odd
-    base = geohash.chop
-    if (@@borders[dir][type].index(last_chr))
-      base = calculate_adjacent(base, dir)
-    end
-    base.concat(BASE32[@@neighbors[dir][type].index(last_chr)])
-  end
+  # def self.calculate_adjacent(geohash, dir)
+  #   geohash.downcase!
+  #   last_chr = geohash[-1]
+  #   type = (geohash.size % 2).zero? ? :even : :odd
+  #   base = geohash.chop
+  #   if (@@borders[dir][type].index(last_chr))
+  #     base = calculate_adjacent(base, dir)
+  #   end
+  #   base.concat(BASE32[@@neighbors[dir][type].index(last_chr)])
+  # end
   
   def initialize(*params)
     if params.first.is_a?(Float)
