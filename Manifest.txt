@@ -1,0 +1,8 @@
+History.txt
+README.txt
+Rakefile
+bin/geohash
+extconf.rb
+geohash.c
+lib/geohash.rb
+test/test_geohash.rb
