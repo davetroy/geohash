@@ -53,10 +53,10 @@ class GeoHashTest < Test::Unit::TestCase
   def test_neighbors
     #assert_equal "dqcw6", GeoHash.calculate_adjacent("dqcw4", :top) 
     #assert_equal "dqctf", GeoHash.calculate_adjacent("dqcw4", :bottom) 
-    assert_equal "dqcwh", GeoHash.calculate_adjacent("dqcw5", 0)  # Right
-    assert_equal "dqcw7", GeoHash.calculate_adjacent("dqcw5", 1)  # Top
-    assert_equal "dqctg", GeoHash.calculate_adjacent("dqcw5", 2)  
-    assert_equal "dqcw4", GeoHash.calculate_adjacent("dqcw5", 3)
+    assert_equal "dqcw4", GeoHash.calculate_adjacent("dqcw5", 0)
+    assert_equal "dqcw7", GeoHash.calculate_adjacent("dqcw5", 1)
+    assert_equal "dqctg", GeoHash.calculate_adjacent("dqcw5", 2)
+    assert_equal "dqcwh", GeoHash.calculate_adjacent("dqcw5", 3)
     #assert_equal ["dqcw7", "dqctg", "dqcw4", "dqcwh", "dqcw6", "dqcwk", "dqctf", "dqctu"], GeoHash.new("dqcw5").neighbors
   end
   

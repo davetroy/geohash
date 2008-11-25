@@ -11,29 +11,29 @@ class GeoHash
   
   VERSION = '1.1.0'
 
-  BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz"
+  # BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz"
 
-  @@neighbors = {:right  => { :even => "bc01fg45238967deuvhjyznpkmstqrwx" },
-                 :left   => { :even => "238967debc01fg45kmstqrwxuvhjyznp" },
-                 :top    => { :even => "p0r21436x8zb9dcf5h7kjnmqesgutwvy" },
-                 :bottom => { :even => "14365h7k9dcfesgujnmqp0r2twvyx8zb" } }
-
-  @@borders   = {:right  => { :even => "bcfguvyz" },
-                 :left   => { :even => "0145hjnp" },
-                 :top    => { :even => "prxz" },
-                 :bottom => { :even => "028b" } }
-                
-  @@neighbors[:bottom][:odd] = @@neighbors[:left][:even]
-  @@neighbors[:top][:odd] = @@neighbors[:right][:even]
-  @@neighbors[:left][:odd] = @@neighbors[:bottom][:even]
-  @@neighbors[:right][:odd] = @@neighbors[:top][:even]
-
-  @@borders[:bottom][:odd] = @@borders[:left][:even]
-  @@borders[:top][:odd] = @@borders[:right][:even]
-  @@borders[:left][:odd] = @@borders[:bottom][:even]
-  @@borders[:right][:odd] = @@borders[:top][:even]
-
-  NEIGHBOR_DIRECTIONS = [ [:top, :bottom], [:left, :right] ]
+  # @@neighbors = {:right  => { :even => "bc01fg45238967deuvhjyznpkmstqrwx" },
+  #                :left   => { :even => "238967debc01fg45kmstqrwxuvhjyznp" },
+  #                :top    => { :even => "p0r21436x8zb9dcf5h7kjnmqesgutwvy" },
+  #                :bottom => { :even => "14365h7k9dcfesgujnmqp0r2twvyx8zb" } }
+  # 
+  # @@borders   = {:right  => { :even => "bcfguvyz" },
+  #                :left   => { :even => "0145hjnp" },
+  #                :top    => { :even => "prxz" },
+  #                :bottom => { :even => "028b" } }
+  #               
+  # @@neighbors[:bottom][:odd] = @@neighbors[:left][:even]
+  # @@neighbors[:top][:odd] = @@neighbors[:right][:even]
+  # @@neighbors[:left][:odd] = @@neighbors[:bottom][:even]
+  # @@neighbors[:right][:odd] = @@neighbors[:top][:even]
+  # 
+  # @@borders[:bottom][:odd] = @@borders[:left][:even]
+  # @@borders[:top][:odd] = @@borders[:right][:even]
+  # @@borders[:left][:odd] = @@borders[:bottom][:even]
+  # @@borders[:right][:odd] = @@borders[:top][:even]
+  # 
+  # NEIGHBOR_DIRECTIONS = [ [:top, :bottom], [:left, :right] ]
   
   # Encode latitude and longitude to a geohash with precision digits
   def self.encode(lat, lon, precision=10)

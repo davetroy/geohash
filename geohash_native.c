@@ -179,21 +179,20 @@ static VALUE decode(VALUE self, VALUE str)
 	return ary;
 }
 
-void get_neighbor(char *str, int dir)
+void get_neighbor(char *str, int dir, int hashlen)
 {
 	char last_chr, *border, *neighbor;
-	int index = ((strlen(str) % 2) + dir) % 4;
+	int index = ( (hashlen / 2) + 1 + dir) % 4;
 	neighbor = neighbors[index];
 	border = borders[index];
-	last_chr = str[strlen(str)-1];
-	printf("strlen(str)=%d, dir=%d, index=%d, str=%s, border=%s, neighbor=%s, last_chr=%c\n", strlen(str), dir, index, str, border, neighbor,last_chr);
+	last_chr = str[hashlen-1];
+	printf("hashlen=%d, dir=%d, index=%d, str=%s, border=%s, neighbor=%s, last_chr=%c\n", hashlen, dir, index, str, border, neighbor,last_chr);
 	if (strchr(border,last_chr)) {
 		printf("finding border for %c in %s\n", last_chr, border);
-		str[strlen(str)-1] = NULL;
-		get_neighbor(str, dir);
+		get_neighbor(str, dir, hashlen-1);
 	}
 	printf("replacing last character (%c) with new char (%c)\n", last_chr, BASE32[strchr(neighbor, last_chr)-neighbor]);
-	str[strlen(str)-1] = BASE32[strchr(neighbor, last_chr)-neighbor];
+	str[hashlen-1] = BASE32[strchr(neighbor, last_chr)-neighbor];
 }
 
 static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
@@ -205,7 +204,7 @@ static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
 	str = RSTRING(geohash)->ptr;
 	if (!strlen(str)) return Qnil;
 	ret_val = rb_str_new(str,strlen(str));
-	get_neighbor(RSTRING(ret_val)->ptr, NUM2INT(dir));
+	get_neighbor(RSTRING(ret_val)->ptr, NUM2INT(dir), strlen(str));
 	return ret_val;
 }
 
