@@ -32,18 +32,11 @@ static VALUE rb_cGeoHash;
 
 #define BASE32	"0123456789bcdefghjkmnpqrstuvwxyz"
 
-static void refine_interval(double *interval, char cd, char mask) {
-	if (cd&mask)
-		interval[0] = (interval[0] + interval[1])/2;
-	else
-		interval[1] = (interval[0] + interval[1])/2;
-}
-
 static void decode_geohash_bbox(char *geohash, double *lat, double *lon) {
-	int i, j, hashlen, is_even=1;
+	int i, j, hashlen;
 	double lat_err, lon_err;
-	char c, cd, mask;
-	char bits[] = {16,8,4,2,1};
+	char c, cd, mask, is_even=1;
+	static char bits[] = {16,8,4,2,1};
 	
 	lat[0] = -90.0;  lat[1] = 90.0;
 	lon[0] = -180.0; lon[1] = 180.0;
@@ -57,10 +50,10 @@ static void decode_geohash_bbox(char *geohash, double *lat, double *lon) {
 			mask = bits[j];
 			if (is_even) {
 				lon_err /= 2;
-				refine_interval(lon, cd, mask);
+				lon[!(cd&mask)] = (lon[0] + lon[1])/2;
 			} else {
 				lat_err /= 2;
-				refine_interval(lat, cd, mask);
+				lat[!(cd&mask)] = (lat[0] + lat[1])/2;
 			}
 			is_even = !is_even;
 		}
@@ -170,7 +163,7 @@ static VALUE decode(VALUE self, VALUE str)
 	return ary;
 }
 
-// Given a particular geohash string, a direction, and an final length
+// Given a particular geohash string, a direction, and a final length
 // Compute a neighbor using base32 lookups, recursively when necessary
 void get_neighbor(char *str, int dir, int hashlen)
 {
