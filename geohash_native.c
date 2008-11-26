@@ -182,16 +182,16 @@ static VALUE decode(VALUE self, VALUE str)
 void get_neighbor(char *str, int dir, int hashlen)
 {
 	char last_chr, *border, *neighbor;
-	int index = ( (hashlen / 2) + 1 + dir) % 4;
+	int index = ( 2 * (hashlen % 2) + dir) % 4;
 	neighbor = neighbors[index];
 	border = borders[index];
 	last_chr = str[hashlen-1];
-	printf("hashlen=%d, dir=%d, index=%d, str=%s, border=%s, neighbor=%s, last_chr=%c\n", hashlen, dir, index, str, border, neighbor,last_chr);
+	//printf("hashlen=%d, dir=%d, index=%d, str=%s, border=%s, neighbor=%s, last_chr=%c\n", hashlen, dir, index, str, border, neighbor,last_chr);
 	if (strchr(border,last_chr)) {
-		printf("finding border for %c in %s\n", last_chr, border);
+		//printf("finding border for %c in %s\n", last_chr, border);
 		get_neighbor(str, dir, hashlen-1);
 	}
-	printf("replacing last character (%c) with new char (%c)\n", last_chr, BASE32[strchr(neighbor, last_chr)-neighbor]);
+	//printf("replacing last character (%c) with new char (%c)\n", last_chr, BASE32[strchr(neighbor, last_chr)-neighbor]);
 	str[hashlen-1] = BASE32[strchr(neighbor, last_chr)-neighbor];
 }
 

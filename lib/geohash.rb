@@ -11,6 +11,7 @@ class GeoHash
   
   VERSION = '1.1.0'
 
+  # 3 => 1, 2 => 0, 1 => 3, 0 => 2
   # BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz"
 
   # @@neighbors = {:right  => { :even => "bc01fg45238967deuvhjyznpkmstqrwx" },
@@ -33,7 +34,7 @@ class GeoHash
   # @@borders[:left][:odd] = @@borders[:bottom][:even]
   # @@borders[:right][:odd] = @@borders[:top][:even]
   # 
-  # NEIGHBOR_DIRECTIONS = [ [:top, :bottom], [:left, :right] ]
+  NEIGHBOR_DIRECTIONS = [ [0, 1], [2, 3] ]
   
   # Encode latitude and longitude to a geohash with precision digits
   def self.encode(lat, lon, precision=10)
