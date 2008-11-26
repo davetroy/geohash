@@ -11,29 +11,6 @@ class GeoHash
   
   VERSION = '1.1.0'
 
-  # 3 => 1, 2 => 0, 1 => 3, 0 => 2
-  # BASE32 = "0123456789bcdefghjkmnpqrstuvwxyz"
-
-  # @@neighbors = {:right  => { :even => "bc01fg45238967deuvhjyznpkmstqrwx" },
-  #                :left   => { :even => "238967debc01fg45kmstqrwxuvhjyznp" },
-  #                :top    => { :even => "p0r21436x8zb9dcf5h7kjnmqesgutwvy" },
-  #                :bottom => { :even => "14365h7k9dcfesgujnmqp0r2twvyx8zb" } }
-  # 
-  # @@borders   = {:right  => { :even => "bcfguvyz" },
-  #                :left   => { :even => "0145hjnp" },
-  #                :top    => { :even => "prxz" },
-  #                :bottom => { :even => "028b" } }
-  #               
-  # @@neighbors[:bottom][:odd] = @@neighbors[:left][:even]
-  # @@neighbors[:top][:odd] = @@neighbors[:right][:even]
-  # @@neighbors[:left][:odd] = @@neighbors[:bottom][:even]
-  # @@neighbors[:right][:odd] = @@neighbors[:top][:even]
-  # 
-  # @@borders[:bottom][:odd] = @@borders[:left][:even]
-  # @@borders[:top][:odd] = @@borders[:right][:even]
-  # @@borders[:left][:odd] = @@borders[:bottom][:even]
-  # @@borders[:right][:odd] = @@borders[:top][:even]
-  # 
   NEIGHBOR_DIRECTIONS = [ [0, 1], [2, 3] ]
   
   # Encode latitude and longitude to a geohash with precision digits
@@ -46,18 +23,7 @@ class GeoHash
     lat, lon = decode_base(geohash)
     [lat.decimals(decimals), lon.decimals(decimals)]
   end
-  
-  # def self.calculate_adjacent(geohash, dir)
-  #   geohash.downcase!
-  #   last_chr = geohash[-1]
-  #   type = (geohash.size % 2).zero? ? :even : :odd
-  #   base = geohash.chop
-  #   if (@@borders[dir][type].index(last_chr))
-  #     base = calculate_adjacent(base, dir)
-  #   end
-  #   base.concat(BASE32[@@neighbors[dir][type].index(last_chr)])
-  # end
-  
+    
   def initialize(*params)
     if params.first.is_a?(Float)
       @value = GeoHash.encode(*params)
