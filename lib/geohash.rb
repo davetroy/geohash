@@ -33,6 +33,7 @@ class GeoHash
       @value = params.first
       @latitude, @longitude = GeoHash.decode(@value)
     end
+    @bounding_box = GeoHash.decode_bbox(@value)
   end
   
   def to_s
