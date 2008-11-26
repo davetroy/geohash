@@ -1,0 +1,86 @@
+= geohash
+
+* http://rubyforge.org/projects/geohash
+
+== DESCRIPTION:
+
+GeoHash Gem for Ruby (c) 2008 David Troy
+dave@roundhousetech.com
+
+Geohash is a latitude/longitude encoding system invented by Gustavo Niemeyer when writing the
+web service at geohash.org, and put into the public domain. Geohashes offer properties like
+arbitrary precision, similar prefixes for nearby positions, and the possibility of gradually
+removing characters from the end of the code to reduce its size (and gradually lose precision).
+
+See these resources online:
+http://geohash.org
+http://en.wikipedia.org/wiki/Geohash
+http://openlocation.org/geohash/geohash-js (javascript implementation and demo)
+
+== FEATURES/PROBLEMS:
+
+* Encode to Geohash Format to an arbitrary level of precision
+* Decode from Geohash Format to an arbitrary level of precision
+* C implementation is over 10 times faster than native Ruby code (we checked)
+* No known problems
+
+== SYNOPSIS:
+
+GeoHash is very easy to use (and fast) because it's written in C with Ruby bindings.
+
+  require 'rubygems'
+  require 'geohash'
+
+  GeoHash.decode('f77')
+  => [63.98438, -73.82813]
+
+  GeoHash.encode(39.51, -76.24)
+  => "dr1bc0edrj"
+  
+  # Decode a geohash to a bounding box
+  decode_bbox('dqcw4')
+  => [39.0234375, -76.552734375], [39.0673828125, -76.5087890625]]
+  
+You can encode or decode to an arbitrary level of precision:
+
+# Encode latitude and longitude to a geohash with precision digits
+encode(lat, lon, precision=10)
+
+# Decode a geohash to a latitude and longitude with decimals digits
+decode(geohash, decimals=5)
+
+Have fun with this!  GeoHash is the new black.
+
+== REQUIREMENTS:
+
+* GCC and a Gnu-ish build environment (for native extensions)
+
+== INSTALL:
+
+1. gem install geohash
+2. profit!
+
+== LICENSE:
+
+(The MIT License)
+
+Copyright (c) 2008 David Troy, Roundhouse Technologies LLC
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
