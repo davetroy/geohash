@@ -23,7 +23,8 @@ class GeoHash
     lat, lon = decode_base(geohash)
     [lat.decimals(decimals), lon.decimals(decimals)]
   end
-    
+  
+  # Create a new GeoHash object from a geohash or from a latlon
   def initialize(*params)
     if params.first.is_a?(Float)
       @value = GeoHash.encode(*params)

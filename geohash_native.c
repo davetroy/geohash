@@ -30,15 +30,6 @@
 
 static VALUE rb_cGeoHash;
 
-/* Right, Left, Top, Bottom */
-
-static char *neighbors[] = { "bc01fg45238967deuvhjyznpkmstqrwx",
-														 "238967debc01fg45kmstqrwxuvhjyznp",
-														 "p0r21436x8zb9dcf5h7kjnmqesgutwvy",
-														 "14365h7k9dcfesgujnmqp0r2twvyx8zb" };
-												
-static char *borders[] = { "bcfguvyz", "0145hjnp", "prxz", "028b" };
-
 #define BASE32	"0123456789bcdefghjkmnpqrstuvwxyz"
 
 static void refine_interval(double *interval, char cd, char mask) {
@@ -179,22 +170,30 @@ static VALUE decode(VALUE self, VALUE str)
 	return ary;
 }
 
+// Given a particular geohash string, a direction, and an final length
+// Compute a neighbor using base32 lookups, recursively when necessary
 void get_neighbor(char *str, int dir, int hashlen)
 {
+	/* Right, Left, Top, Bottom */
+
+	static char *neighbors[] = { "bc01fg45238967deuvhjyznpkmstqrwx",
+														 	 "238967debc01fg45kmstqrwxuvhjyznp",
+														 	 "p0r21436x8zb9dcf5h7kjnmqesgutwvy",
+														   "14365h7k9dcfesgujnmqp0r2twvyx8zb" };
+												
+	static char *borders[] = { "bcfguvyz", "0145hjnp", "prxz", "028b" };
+
 	char last_chr, *border, *neighbor;
 	int index = ( 2 * (hashlen % 2) + dir) % 4;
 	neighbor = neighbors[index];
 	border = borders[index];
 	last_chr = str[hashlen-1];
-	//printf("hashlen=%d, dir=%d, index=%d, str=%s, border=%s, neighbor=%s, last_chr=%c\n", hashlen, dir, index, str, border, neighbor,last_chr);
-	if (strchr(border,last_chr)) {
-		//printf("finding border for %c in %s\n", last_chr, border);
+	if (strchr(border,last_chr))
 		get_neighbor(str, dir, hashlen-1);
-	}
-	//printf("replacing last character (%c) with new char (%c)\n", last_chr, BASE32[strchr(neighbor, last_chr)-neighbor]);
 	str[hashlen-1] = BASE32[strchr(neighbor, last_chr)-neighbor];
 }
 
+// Acts as Ruby API wrapper to get_neighbor function, which is recursive and does nasty C things
 static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
 {
 	char *str;

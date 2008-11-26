@@ -53,13 +53,14 @@ class GeoHashTest < Test::Unit::TestCase
   def test_neighbors
     assert_equal ["dqcjr1", "dqcjq9", "dqcjqf", "dqcjqb", "dqcjr4", "dqcjr0", "dqcjqd", "dqcjq8"], GeoHash.new("dqcjqc").neighbors
 
-    assert_equal "dqcw5", GeoHash.calculate_adjacent("dqcw4", 0) 
-    assert_equal "dqcw1", GeoHash.calculate_adjacent("dqcw4", 1) 
+    assert_equal "dqcw5", GeoHash.calculate_adjacent("dqcw4", 0)  # right
+    assert_equal "dqcw1", GeoHash.calculate_adjacent("dqcw4", 1)  # left
+    assert_equal "dqctc", GeoHash.calculate_adjacent("dqcw1", 3)  # bottom
 
-    assert_equal "dqcwh", GeoHash.calculate_adjacent("dqcw5", 0)
-    assert_equal "dqcw4", GeoHash.calculate_adjacent("dqcw5", 1)
-    assert_equal "dqcw7", GeoHash.calculate_adjacent("dqcw5", 2)
-    assert_equal "dqctg", GeoHash.calculate_adjacent("dqcw5", 3)
+    assert_equal "dqcwh", GeoHash.calculate_adjacent("dqcw5", 0)  # right
+    assert_equal "dqcw4", GeoHash.calculate_adjacent("dqcw5", 1)  # left
+    assert_equal "dqcw7", GeoHash.calculate_adjacent("dqcw5", 2)  # top
+    assert_equal "dqctg", GeoHash.calculate_adjacent("dqcw5", 3)  # bottom
     assert_equal 8, (["dqcw7", "dqctg", "dqcw4", "dqcwh", "dqcw6", "dqcwk", "dqctf", "dqctu"] & GeoHash.new("dqcw5").neighbors).size
   end
   
