@@ -55,6 +55,7 @@ class GeoHashTest < Test::Unit::TestCase
 
     assert_equal "dqcw5", GeoHash.calculate_adjacent("dqcw4", 0)  # right
     assert_equal "dqcw1", GeoHash.calculate_adjacent("dqcw4", 1)  # left
+    
     assert_equal "dqctc", GeoHash.calculate_adjacent("dqcw1", 3)  # bottom
 
     assert_equal "dqcwh", GeoHash.calculate_adjacent("dqcw5", 0)  # right
