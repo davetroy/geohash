@@ -17,5 +17,6 @@ Gem::Specification.new do |s|
   s.test_files = ["test/test_geohash.rb"]
   s.rdoc_options = ["--main", "README"]
   s.extensions = 'extconf.rb'
+  s.require_paths = 'lib'
   s.extra_rdoc_files = ["Manifest.txt", "README"]
 end
