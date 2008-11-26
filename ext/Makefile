@@ -116,13 +116,7 @@ install-rb: pre-install-rb install-rb-default
 install-rb-default: pre-install-rb-default
 pre-install-rb: Makefile
 pre-install-rb-default: Makefile
-pre-install-rb-default: $(RUBYLIBDIR)
-install-rb-default: $(RUBYLIBDIR)/geohash.rb
-$(RUBYLIBDIR)/geohash.rb: $(srcdir)/lib/geohash.rb
-	$(INSTALL_DATA) $(srcdir)/lib/geohash.rb $(@D)
 $(RUBYARCHDIR):
-	$(MAKEDIRS) $@
-$(RUBYLIBDIR):
 	$(MAKEDIRS) $@
 
 site-install: site-install-so site-install-rb

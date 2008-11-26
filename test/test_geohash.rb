@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-$LOAD_PATH << "#{File.dirname(__FILE__)}/.."
+$LOAD_PATH << "#{File.dirname(__FILE__)}/../ext"
 require "#{File.dirname(__FILE__)}/../lib/geohash"
 require 'test/unit'
 
@@ -65,13 +65,13 @@ class GeoHashTest < Test::Unit::TestCase
     assert_equal 8, (["dqcw7", "dqctg", "dqcw4", "dqcwh", "dqcw6", "dqcwk", "dqctf", "dqctu"] & GeoHash.new("dqcw5").neighbors).size
   end
   
-  require 'benchmark'
-  def test_multiple
-    Benchmark.bmbm(30) do |bm|
-      bm.report("encoding") {30000.times { test_encoding }}
-      bm.report("decoding") {30000.times { test_decoding }}
-      #bm.report("neighbors") {30000.times { test_neighbors }}
-    end
-  end
+  # require 'benchmark'
+  # def test_multiple
+  #   Benchmark.bmbm(30) do |bm|
+  #     bm.report("encoding") {30000.times { test_encoding }}
+  #     bm.report("decoding") {30000.times { test_decoding }}
+  #     #bm.report("neighbors") {30000.times { test_neighbors }}
+  #   end
+  # end
 end
 
