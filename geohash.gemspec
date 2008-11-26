@@ -12,11 +12,9 @@ Gem::Specification.new do |s|
   s.authors  = ["David Troy"]
   s.files    = ["ext/extconf.rb", 
 		"ext/geohash_native.c",
-		"ext/Makefile",
 		"lib/geohash.rb"]
   s.test_files = ["test/test_geohash.rb"]
   s.rdoc_options = ["--main", "README"]
-  s.extensions = 'ext/extconf.rb'
-  s.require_paths = ['lib', 'ext']
+  s.extensions << 'ext/extconf.rb'
   s.extra_rdoc_files = ["Manifest.txt", "README"]
 end
