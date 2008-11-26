@@ -55,10 +55,15 @@ Have fun with this!  GeoHash is the new black.
 
 * GCC and a Gnu-ish build environment (for native extensions)
 
-== INSTALL:
+== INSTALLATION
 
-1. gem install geohash
-2. profit!
+1) Enable gems from github, if you haven't already done so (rubygems >= 1.2):
+    > sudo gem sources -a http://gems.github.com
+
+2) Install gem
+    > sudo gem install davetroy-geohash
+
+3) Profit!
 
 == LICENSE:
 

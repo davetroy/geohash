@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name     = "geohash"
   s.version  = '1.1.0'
   s.date     = "2008-11-27"
-  s.summary  = "GeoHash Library for Ruby, per http://geohash.org implementation"
+  s.summary  = "GeoHash Library for Ruby, per http://geohash.org implementation."
   s.email    = "dave@roundhousetech.com"
   s.homepage = "http://github.com/davetroy/geohash"
   s.description = "Geohash provides support for manipulating GeoHash strings in Ruby. See http://geohash.org."
