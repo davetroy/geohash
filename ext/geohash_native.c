@@ -69,9 +69,9 @@ static void decode_geohash(char *geohash, double *point) {
 	point[1] = (lon[0] + lon[1]) / 2;
 }
 
-static void encode_geohash(double latitude, double longitude, int precision, char *geohash) {
-	int is_even=1, i=0;
-	double lat[2], lon[2], mid;
+static void encode_geohash(double longitude, double latitude, int precision, char *geohash) {
+	int is_even=1, i=0, k;
+	double lat[2], lon[2], lat_mid, lon_mid;
 	char bits[] = {16,8,4,2,1};
 	int bit=0, ch=0;
 
@@ -80,19 +80,20 @@ static void encode_geohash(double latitude, double longitude, int precision, cha
 	
 	while (i < precision) {
 		if (is_even) {
-			mid = (lon[0] + lon[1]) / 2;
-			if (longitude > mid) {
+			lat_mid = (lon[0] + lon[1]) / 2;
+			
+			if (longitude > lat_mid) {
 				ch |= bits[bit];
-				lon[0] = mid;
+				lon[0] = lat_mid;
 			} else
-				lon[1] = mid;
+				lon[1] = lat_mid;
 		} else {
-			mid = (lat[0] + lat[1]) / 2;
-			if (latitude > mid) {
+			lon_mid = (lat[0] + lat[1]) / 2;
+			if (latitude > lon_mid) {
 				ch |= bits[bit];
-				lat[0] = mid;
+				lat[0] = lon_mid;
 			} else
-				lat[1] = mid;
+				lat[1] = lon_mid;
 		}
 		
 		is_even = !is_even;
@@ -107,7 +108,7 @@ static void encode_geohash(double latitude, double longitude, int precision, cha
 	geohash[i] = 0;
 }
 
-static VALUE encode(VALUE self, VALUE lat, VALUE lon, VALUE precision)
+static VALUE encode(VALUE self, VALUE lon, VALUE lat, VALUE precision)
 {
 	VALUE geohash;
 	char str[15];
@@ -137,13 +138,13 @@ static VALUE decode_bbox(VALUE self, VALUE str)
 	ret = rb_ary_new2(2); /* [[lat[0], lon[0]], [lat[1], lon[1]]] */
 
 	ary = rb_ary_new2(2); /* [lat[0], lon[0]] */
-	rb_ary_store(ary, 0, rb_float_new(lat[0]));
-	rb_ary_store(ary, 1, rb_float_new(lon[0]));
+	rb_ary_store(ary, 0, rb_float_new(lon[0]));
+	rb_ary_store(ary, 1, rb_float_new(lat[0]));
 	rb_ary_store(ret, 0, ary);
 
 	ary = rb_ary_new2(2); /* [lat[1], lon[1]] */
-	rb_ary_store(ary, 0, rb_float_new(lat[1]));
-	rb_ary_store(ary, 1, rb_float_new(lon[1]));
+	rb_ary_store(ary, 0, rb_float_new(lon[1]));
+	rb_ary_store(ary, 1, rb_float_new(lat[1]));
 	rb_ary_store(ret, 1, ary);
 
 	return ret;
