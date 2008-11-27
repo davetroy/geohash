@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
+require 'rubygems'
 $LOAD_PATH << "#{File.dirname(__FILE__)}/../ext"
 require "#{File.dirname(__FILE__)}/../lib/geohash"
 require 'test/unit'
 
 class GeoHashTest < Test::Unit::TestCase
   
+  include GeoRuby::SimpleFeatures
+
   def test_decoding
     assert_equal [39.02474, -76.51100], GeoHash.decode("dqcw4bnrs6s7")
     assert_equal [37.791562, -122.398541], GeoHash.decode("9q8yyz8pg3bb", 6)
@@ -19,7 +22,7 @@ class GeoHashTest < Test::Unit::TestCase
     assert_equal "dqcw4bnrs6s7", GeoHash.encode(39.0247389581054, -76.5110040642321, 12)
     assert_equal "dqcw4bnrs6", GeoHash.encode(39.0247389581054, -76.5110040642321, 10)
     assert_equal "6gkzmg1u", GeoHash.encode(-25.427, -49.315, 8)
-    assert_equal "ezs42", GeoHash.encode(42.60498046875, -5.60302734375, 5)
+    assert_equal "ezs42", GeoHash.new(42.60498046875, -5.60302734375, 5).to_s
   end
 
   def check_decoding(gh)
@@ -47,7 +50,7 @@ class GeoHashTest < Test::Unit::TestCase
   end
   
   def test_specific_bbox
-    assert_equal [[39.0234375, -76.552734375], [39.0673828125, -76.5087890625]], GeoHash.decode_bbox('dqcw4')
+    assert_equal Envelope.from_coordinates([[39.0234375, -76.552734375], [39.0673828125, -76.5087890625]]).lower_corner, GeoHash.new('dqcw4').lower_corner
   end
   
   def test_neighbors
@@ -63,6 +66,10 @@ class GeoHashTest < Test::Unit::TestCase
     assert_equal "dqcw7", GeoHash.calculate_adjacent("dqcw5", 2)  # top
     assert_equal "dqctg", GeoHash.calculate_adjacent("dqcw5", 3)  # bottom
     assert_equal 8, (["dqcw7", "dqctg", "dqcw4", "dqcwh", "dqcw6", "dqcwk", "dqctf", "dqctu"] & GeoHash.new("dqcw5").neighbors).size
+  end
+  
+  def test_radius_search
+    p GeoHash.hashes_within_radius(Point.from_x_y(-76.511,39.024), 1000)
   end
   
   # require 'benchmark'

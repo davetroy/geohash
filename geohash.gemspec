@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = "geohash"
-  s.version  = '1.1.0'
+  s.version  = '1.1.1'
   s.date     = "2008-11-27"
   s.summary  = "GeoHash Library for Ruby, per http://geohash.org implementation."
   s.email    = "dave@roundhousetech.com"
@@ -15,4 +15,5 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README"]
   s.extensions << 'ext/extconf.rb'
   s.extra_rdoc_files = ["Manifest.txt", "README"]
+  s.add_dependency("GeoRuby", ["> 0.0.0"])
 end

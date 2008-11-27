@@ -28,7 +28,7 @@
 #include "ruby.h"
 #include <ctype.h>
 
-static VALUE rb_cGeoHash;
+static VALUE rb_mGeoHash;
 
 #define BASE32	"0123456789bcdefghjkmnpqrstuvwxyz"
 
@@ -177,7 +177,7 @@ void get_neighbor(char *str, int dir, int hashlen)
 	static char *borders[] = { "bcfguvyz", "0145hjnp", "prxz", "028b" };
 
 	char last_chr, *border, *neighbor;
-	int index = ( 2 * (hashlen % 2) + dir) % 4;
+	int index = (2 * (hashlen % 2) + dir) % 4;
 	neighbor = neighbors[index];
 	border = borders[index];
 	last_chr = str[hashlen-1];
@@ -202,11 +202,11 @@ static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
 
 void Init_geohash_native()
 {
-	rb_cGeoHash = rb_define_class("GeoHash", rb_cObject);
-	rb_define_singleton_method(rb_cGeoHash, "decode_bbox", decode_bbox, 1);
-	rb_define_singleton_method(rb_cGeoHash, "decode_base", decode, 1);
-	rb_define_singleton_method(rb_cGeoHash, "encode_base", encode, 3);
-	rb_define_singleton_method(rb_cGeoHash, "calculate_adjacent", calculate_adjacent, 2);
+	rb_mGeoHash = rb_define_module("GeoHashCalculations");
+	rb_define_method(rb_mGeoHash, "decode_bbox", decode_bbox, 1);
+	rb_define_method(rb_mGeoHash, "decode_base", decode, 1);
+	rb_define_method(rb_mGeoHash, "encode_base", encode, 3);
+	rb_define_method(rb_mGeoHash, "calculate_adjacent", calculate_adjacent, 2);
 }
 
 // end
