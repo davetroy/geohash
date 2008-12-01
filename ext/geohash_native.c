@@ -203,7 +203,7 @@ static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
 
 void Init_geohash_native()
 {
-	rb_mGeoHash = rb_define_module("GeoHashCalculations");
+	rb_mGeoHash = rb_define_module("GeoHashNative");
 	rb_define_method(rb_mGeoHash, "decode_bbox", decode_bbox, 1);
 	rb_define_method(rb_mGeoHash, "decode_base", decode, 1);
 	rb_define_method(rb_mGeoHash, "encode_base", encode, 3);

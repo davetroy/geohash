@@ -3,82 +3,61 @@ require 'rubygems'
 $LOAD_PATH << "#{File.dirname(__FILE__)}/../ext"
 require "#{File.dirname(__FILE__)}/../lib/geohash"
 require 'test/unit'
+require 'test_helper'
+require 'active_support'
 
 class GeoHashTest < Test::Unit::TestCase
   
   include GeoRuby::SimpleFeatures
 
-  def test_decoding
-    assert_equal [39.02474, -76.51100], GeoHash.decode("dqcw4bnrs6s7")
-    assert_equal [37.791562, -122.398541], GeoHash.decode("9q8yyz8pg3bb", 6)
-    assert_equal [37.791562, -122.398541], GeoHash.decode("9Q8YYZ8PG3BB", 6)
-    assert_equal [42.60498046875, -5.60302734375], GeoHash.decode("ezs42", 11)
-    assert_equal [-25.382708, -49.265506], GeoHash.decode("6gkzwgjzn820",6)
-    assert_equal [-25.383, -49.266], GeoHash.decode("6gkzwgjz", 3)
-    assert_equal [37.8565, -122.2554], GeoHash.decode("9q9p658642g7", 4)
-  end
-
-  def test_encoding
-    assert_equal "dqcw4bnrs6s7", GeoHash.encode(39.0247389581054, -76.5110040642321, 12)
-    assert_equal "dqcw4bnrs6", GeoHash.encode(39.0247389581054, -76.5110040642321, 10)
-    assert_equal "6gkzmg1u", GeoHash.encode(-25.427, -49.315, 8)
-    assert_equal "ezs42", GeoHash.new(42.60498046875, -5.60302734375, 5).to_s
-  end
-
-  def check_decoding(gh)
-    exact = GeoHash.decode(gh, 20)
-    bbox = GeoHash.decode_bbox(gh)
-
-    # check that the bbox is centered on the decoded point
-    bbox_center = [(bbox[0][0] + bbox[1][0]) / 2, (bbox[0][1] + bbox[1][1]) / 2]
-    assert_equal exact, bbox_center
-
-    # check that the bounding box is the expected size
-    bits = gh.size * 5
-    lon_bits = (bits.to_f/2).ceil
-    lat_bits = (bits.to_f/2).floor
-    correct_size = [180.0/2**lat_bits, 360.0/2**lon_bits]
-    bbox_size = [bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1]]
-    assert_equal bbox_size, correct_size
-  end  
-
-  # def test_decoding_bbox
-  #   s = "dqcw4bnrs6s7"
-  #   (s.length).downto(0) do |l|
-  #     check_decoding(s[0..l])
-  #   end
-  # end
-  
-  def test_specific_bbox
-    #assert_equal Envelope.from_coordinates([[39.0234375, -76.552734375], [39.0673828125, -76.5087890625]]).lower_corner, GeoHash.new('dqcw4').lower_corner
+  def test_initialization_modes
+    assert_equal "dqcw4bn7k2", GeoHash.new(Point.from_lon_lat(-76.511,39.024)).to_s
+    assert_points_equal Point.from_lon_lat(-76.5110045671463,39.0239980816841), GeoHash.new("dqcw4bn7k2").center
+    assert_points_equal Point.from_lon_lat(-76.500, 39.02400), GeoHash.new(-76.500, 39.02400).center
   end
   
   def test_neighbors
-    assert_equal ["dqcjr1", "dqcjq9", "dqcjqf", "dqcjqb", "dqcjr4", "dqcjr0", "dqcjqd", "dqcjq8"], GeoHash.new("dqcjqc").neighbors
-
-    assert_equal "dqcw5", GeoHash.calculate_adjacent("dqcw4", 0)  # right
-    assert_equal "dqcw1", GeoHash.calculate_adjacent("dqcw4", 1)  # left
-    
-    assert_equal "dqctc", GeoHash.calculate_adjacent("dqcw1", 3)  # bottom
-
-    assert_equal "dqcwh", GeoHash.calculate_adjacent("dqcw5", 0)  # right
-    assert_equal "dqcw4", GeoHash.calculate_adjacent("dqcw5", 1)  # left
-    assert_equal "dqcw7", GeoHash.calculate_adjacent("dqcw5", 2)  # top
-    assert_equal "dqctg", GeoHash.calculate_adjacent("dqcw5", 3)  # bottom
-    assert_equal 8, (["dqcw7", "dqctg", "dqcw4", "dqcwh", "dqcw6", "dqcwk", "dqctf", "dqctu"] & GeoHash.new("dqcw5").neighbors).size
+    gh = GeoHash.new(-76.511,39.024,7)
+    neighbor_hashes = gh.neighbors.map { |n| n.to_s }
+    assert_equal ["dqctfzy","dqctfzz","dqcw4bp","dqcw4bq","dqcw4br","dqcw4bj","dqctfzv","dqcw4bm"].to_set, neighbor_hashes.to_set
   end
   
-  # def test_radius_search
-  #   p GeoHash.hashes_within_radius(Point.from_lon_lat(-76.511,39.024), 1000)
-  # end
+  def test_contains
+    p1 = GeoHash.new("dqcw4bn7k2")
+    p2 = GeoHash.new("dqcw4")
+    assert p2.contains?(p1.center)
+  end
   
-  # require 'benchmark'
-  # def test_multiple
-  #   Benchmark.bmbm(30) do |bm|
-  #     bm.report("encoding") {30000.times { test_encoding }}
-  #     bm.report("decoding") {30000.times { test_decoding }}
-  #     #bm.report("neighbors") {30000.times { test_neighbors }}
-  #   end
-  # end
+  def test_largest_parent
+    gh = GeoHash.new(-76.511, 39.024, 10)
+    assert_equal "dqcw4bn7k2", gh.largest_parent_within_radius(1).to_s
+    assert_equal "dqcw4bn7k", gh.largest_parent_within_radius(10).to_s
+    assert_equal "dqcw4bn7", gh.largest_parent_within_radius(30).to_s
+    assert_equal "dqcw4bn", gh.largest_parent_within_radius(200).to_s
+  end
+  
+  def test_extend_in_direction
+    gh = GeoHash.new(-76.511, 39.024, 10)
+    right_neighbors = gh.extend_in_direction(0, 50)
+    assert_equal 53, right_neighbors.size
+    left_neighbors = gh.extend_in_direction(1, 50)
+    assert_equal 53, left_neighbors.size
+    top_neighbors = gh.extend_in_direction(2, 50)
+    assert_equal 83, top_neighbors.size
+    bottom_neighbors = gh.extend_in_direction(3, 50)
+    assert_equal 83, bottom_neighbors.size
+  end
+  
+  def test_extend_n_times
+    gh = GeoHash.new(-76.511, 39.024, 9)
+    nlist = gh.extend_n_times(6, 0)
+    assert_equal 6, nlist.size
+  end
+  
+  def test_neighbors_within_radius
+    gh = GeoHash.new(-76.511, 39.024, 9)
+    nlist = gh.neighbors_within_radius(50).map { |n| n.to_s }
+    assert_equal nlist.size, nlist.uniq.size
+  end
 end
 
