@@ -63,6 +63,37 @@ module GeoRuby
         list
       end
       
+      def decimal_value
+        l = @value.size
+        num = 0
+        0.upto(l) do |d|
+          c = @value[l-d-1]
+          digit = BASE32.index(c)
+          decval = digit * (32**d)
+          #puts "#{@value} (#{c}) = #{digit} (#{decval} : 32^#{d})"
+          num += decval
+        end
+        num
+      end
+
+      def neighbors_in_range2(radius)
+        upper_left = GeoHash.new(Point.from_point(Point.from_point(self.point,0,radius),270,radius), value.size)
+        lower_right = GeoHash.new(Point.from_point(Point.from_point(self.point,180,radius),90,radius), value.size)
+        upper_right = GeoHash.new(Point.from_point(Point.from_point(self.point,0,radius),90,radius), value.size)
+        lower_left = GeoHash.new(Point.from_point(Point.from_point(self.point,180,radius),270,radius), value.size)
+        p BASE32
+        puts "ul, ur:"
+        puts upper_left, upper_right
+        next_left = GeoHash.new(GeoHash.calculate_adjacent(upper_left.value, 3))
+
+        puts "lr, ll:"
+        puts lower_right, lower_left
+        cells = [90,270,0,180].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
+        y_axis = cells[2].extend_to(cells[3],3)
+        x_axis = cells[1].extend_to(cells[0],0)
+        y_axis + x_axis
+      end
+      
       def neighbors_in_range(radius)
         cells = [45,135,225,315].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
         cells << self
@@ -107,35 +138,13 @@ module GeoRuby
       end
       
       def hash_within_radius?(gh, r, from_point=self.point)
-        included_corners = gh.four_corners.find_all { |p| from_point.ellipsoidal_distance(p) <= r }
-        included_corners.size == 4
+        return false if gh.four_corners.find { |p| from_point.ellipsoidal_distance(p) > r }
+        true
       end
-      
-      def extend_in_direction(dir, r)
-        neighbor_list = []
-        current = self
-        begin
-          new_neighbor = GeoHash.new(GeoHash.calculate_adjacent(current.value, dir))
-          valid = hash_within_radius?(new_neighbor,r)
-          neighbor_list << new_neighbor if valid
-          current = new_neighbor
-        end until (!valid)
-        neighbor_list
-      end
-      
-      def extend_n_times(n,dir)
-        neighbor_list = []
-        current = self
-        1.upto(n) do
-          new_neighbor = GeoHash.new(GeoHash.calculate_adjacent(current.value, dir))
-          neighbor_list << new_neighbor
-          current = new_neighbor
-        end
-        neighbor_list
-      end
-      
+            
       def neighbors_within_radius(r)
-        largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point) }.flatten
+        largest_parent_within_radius(r).neighbors_in_range(r)
+        #largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point) }.flatten
       end
       
     end

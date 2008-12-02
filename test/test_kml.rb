@@ -16,8 +16,8 @@ end
 
 include GeoRuby::SimpleFeatures
   
-gh = GeoHash.new(-76.511, 39.024, 9)
-@matrix = gh.neighbors_within_radius(8000)
+gh = GeoHash.new(-76.511, 39.024, 6)
+@matrix = gh.neighbors_within_radius(14000)
 #@matrix = gh.children_within_radius(2500)
 #@matrix = gh.neighbors_in_range(8000)
 
@@ -34,9 +34,11 @@ File.open("./foo.kml", 'w') do |f|
           xml.color "7dff0000"
         end
       end
+      lastdec = 0
       @matrix.each do |n|
         xml.tag! "Placemark", :id => n.value do
           xml.styleUrl "#transBluePoly"
+          xml.name n.value
           xml.tag! "Polygon" do
             xml.extrude 1
             xml.altitudeMode 'relativeToGround'
@@ -47,7 +49,9 @@ File.open("./foo.kml", 'w') do |f|
             end
           end
         end
-      end    
+      end
+      
+      
     end
   end
 end

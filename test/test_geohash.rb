@@ -36,24 +36,6 @@ class GeoHashTest < Test::Unit::TestCase
     assert_equal "dqc", gh.largest_parent_within_radius(200000).to_s
   end
   
-  def test_extend_in_direction
-    gh = GeoHash.new(-76.511, 39.024, 10)
-    right_neighbors = gh.extend_in_direction(0, 50)
-    assert_equal 53, right_neighbors.size
-    left_neighbors = gh.extend_in_direction(1, 50)
-    assert_equal 52, left_neighbors.size
-    top_neighbors = gh.extend_in_direction(2, 50)
-    assert_equal 83, top_neighbors.size
-    bottom_neighbors = gh.extend_in_direction(3, 50)
-    assert_equal 83, bottom_neighbors.size
-  end
-  
-  def test_extend_n_times
-    gh = GeoHash.new(-76.511, 39.024, 9)
-    nlist = gh.extend_n_times(6, 0)
-    assert_equal 6, nlist.size
-  end
-  
   def test_neighbors_within_radius
     gh = GeoHash.new(-76.511, 39.024, 9)
     nlist = gh.neighbors_within_radius(50).map { |n| n.to_s }
