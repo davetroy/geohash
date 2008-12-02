@@ -9,14 +9,17 @@ require 'active_support'
 require 'builder'
 
 def make_polygon(n)
-  n.four_corners.map { |c| [c.x, c.y, 0].join(',') }.join("\n")
+  points = n.four_corners
+  points << points.first
+  points.map { |p| [p.x, p.y, 100].join(',') }.join("\n")
 end
 
 include GeoRuby::SimpleFeatures
   
-gh = GeoHash.new(-76.511, 39.024, 5)
-@matrix = gh.neighbors_within_radius2(2500)
+gh = GeoHash.new(-76.511, 39.024, 9)
+@matrix = gh.neighbors_within_radius(8000)
 #@matrix = gh.children_within_radius(2500)
+#@matrix = gh.neighbors_in_range(8000)
 
 File.open("./foo.kml", 'w') do |f|
   xml = Builder::XmlMarkup.new(:target => f, :indent => 1)

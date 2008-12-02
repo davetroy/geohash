@@ -121,7 +121,7 @@ static VALUE encode(VALUE self, VALUE lon, VALUE lat, VALUE precision)
 	if (digits <3 || digits > 12)
 		digits = 12;
 	
-	encode_geohash(RFLOAT(lat)->value, RFLOAT(lon)->value, digits, str);
+	encode_geohash(RFLOAT(lon)->value, RFLOAT(lat)->value, digits, str);
 
 	geohash = rb_str_new2(str);
 	return geohash;

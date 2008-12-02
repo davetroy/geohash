@@ -1,12 +1,13 @@
 require 'geohash_native'
 require 'geo_ruby'
+require 'geo_ruby_extensions'
 
 module GeoRuby
   module SimpleFeatures
     class GeoHash < Envelope
   
       extend GeoHashNative
-      attr_reader :value
+      attr_reader :value, :point
 
       BASE32="0123456789bcdefghjkmnpqrstuvwxyz"
   
@@ -14,15 +15,18 @@ module GeoRuby
       def initialize(*params)
         if (params.first.is_a?(Point))
           point, precision = params
-          @value = GeoHash.encode_base(point.y, point.x, precision || 10)
+          @value = GeoHash.encode_base(point.x, point.y, precision || 10)
+          @point = point
         elsif (params.first.is_a?(String))
           @value = params.first
         elsif (params.size>=2 && params[0].is_a?(Float) && params[1].is_a?(Float))
           precision = params[2] || 10
-          @value = GeoHash.encode_base(params[1], params[0], precision)
+          @value = GeoHash.encode_base(params[0], params[1], precision)
+          @point = Point.from_lon_lat(params[0], params[1])
         end
         points = GeoHash.decode_bbox(@value)
         @lower_corner, @upper_corner =  points.collect{|point_coords| Point.from_coordinates(point_coords,srid,with_z)}
+        @point ||= center
       end
   
       def to_s
@@ -38,12 +42,39 @@ module GeoRuby
         GeoHash.new(GeoHash.calculate_adjacent(@value, dir))
       end
   
+      # Returns the immediate neighbors of a given hash value,
+      # to the same level of precision as the source
       def neighbors
         return @neighbors if @neighbors
         right_left = [0,1].map { |d| neighbor(d) }
         top_bottom = [2,3].map { |d| neighbor(d) }
         diagonals = right_left.map { |n| [2,3].map { |d| n.neighbor(d) } }.flatten
         @neighbors = right_left + top_bottom + diagonals
+      end
+      
+      def extend_to(geohash, dir)
+        list = [self]
+        current = self
+        begin
+          new_neighbor = GeoHash.new(GeoHash.calculate_adjacent(current.value, dir))
+          list << new_neighbor
+          current = new_neighbor
+        end until current.value == geohash.value
+        list
+      end
+      
+      def neighbors_in_range(radius)
+        cells = [45,135,225,315].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
+        cells << self
+        top_row = cells[3].extend_to(cells[0], 0)
+        rows = top_row
+        current_row = top_row
+        begin
+          row = current_row.map { |c| GeoHash.new(GeoHash.calculate_adjacent(c.value, 3)) }
+          rows.concat(row)
+          current_row = row
+        end until current_row.first.value == cells[2].value
+        rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
       end
   
       def four_corners
@@ -57,26 +88,25 @@ module GeoRuby
       end
 
       def children_within_radius(r, from_point=self.center)
-        return [] if self.value.size==8
+        return [self] if hash_within_radius?(self, r, from_point)
         list = []
         children.each do |child|
           if hash_within_radius?(child, r, from_point)
             list << child
-          else
-            list.concat(child.children_within_radius(r, from_point))
+          elsif @value.size < 6
+            list.concat child.children_within_radius(r, from_point)
           end
         end
         list
       end
   
       def largest_parent_within_radius(r)
-        parents = (1..@value.size-1).to_a.map { |l| @value[0..l] }
         last_parent = nil
-        parents.find { |p| last_parent = GeoHash.new(p); hash_within_radius?(last_parent, r) }
+        (3..(@value.size-1)).to_a.find { |precision| last_parent = GeoHash.new(self.point,precision); hash_within_radius?(last_parent, r) }
         last_parent
       end
       
-      def hash_within_radius?(gh, r, from_point=self.center)
+      def hash_within_radius?(gh, r, from_point=self.point)
         included_corners = gh.four_corners.find_all { |p| from_point.ellipsoidal_distance(p) <= r }
         included_corners.size == 4
       end
@@ -105,53 +135,7 @@ module GeoRuby
       end
       
       def neighbors_within_radius(r)
-        right_neighbors = extend_in_direction(0, r)
-        left_neighbors = extend_in_direction(1, r)
-        top_neighbors = extend_in_direction(2, r)
-        bottom_neighbors = extend_in_direction(3, r)
-        upper_right_neighbors = right_neighbors.map { |n| n.extend_n_times(top_neighbors.size-1, 2) }.flatten
-        lower_right_neighbors = right_neighbors.map { |n| n.extend_n_times(top_neighbors.size-1, 3) }.flatten
-        upper_left_neighbors = left_neighbors.map { |n| n.extend_n_times(bottom_neighbors.size-1, 2) }.flatten
-        lower_left_neighbors = left_neighbors.map { |n| n.extend_n_times(bottom_neighbors.size-1, 3) }.flatten
-        all = (right_neighbors + left_neighbors + top_neighbors + bottom_neighbors)  << self
-        all += (upper_right_neighbors + lower_right_neighbors + upper_left_neighbors + lower_left_neighbors)
-        all.delete_if { |n| !hash_within_radius?(n, r) }
-        
-        largest_parent = largest_parent_within_radius(r)
-        largest_right_neighbors = largest_parent.extend_in_direction(0, r)
-        largest_left_neighbors = largest_parent.extend_in_direction(1, r)
-        largest_top_neighbors = largest_parent.extend_in_direction(2, r)
-        largest_bottom_neighbors = largest_parent.extend_in_direction(3, r)
-        largest_upper_right_neighbors = largest_right_neighbors.map { |n| n.extend_n_times(largest_top_neighbors.size-1, 2) }.flatten
-        largest_lower_right_neighbors = largest_right_neighbors.map { |n| n.extend_n_times(largest_top_neighbors.size-1, 3) }.flatten
-        largest_upper_left_neighbors = largest_left_neighbors.map { |n| n.extend_n_times(largest_bottom_neighbors.size-1, 2) }.flatten
-        largest_lower_left_neighbors = largest_left_neighbors.map { |n| n.extend_n_times(largest_bottom_neighbors.size-1, 3) }.flatten
-        largest_all = (largest_right_neighbors + largest_left_neighbors + largest_top_neighbors + largest_bottom_neighbors)  << largest_parent
-        largest_all += (largest_upper_right_neighbors + largest_lower_right_neighbors + largest_upper_left_neighbors + largest_lower_left_neighbors)
-        all = all.delete_if { |n| largest_all.find { |l| n.value.starts_with?(l.value) } }
-        largest_all.concat(all)
-      end
-      
-      def neighbors_within_radius2(r)
-        largest_parent = largest_parent_within_radius(r)
-        largest_right_neighbors = largest_parent.extend_in_direction(0, r)
-        largest_left_neighbors = largest_parent.extend_in_direction(1, r)
-        largest_top_neighbors = largest_parent.extend_in_direction(2, r)
-        largest_bottom_neighbors = largest_parent.extend_in_direction(3, r)
-        largest_upper_right_neighbors = largest_right_neighbors.map { |n| n.extend_n_times(largest_top_neighbors.size-1, 2) }.flatten
-        largest_lower_right_neighbors = largest_right_neighbors.map { |n| n.extend_n_times(largest_top_neighbors.size-1, 3) }.flatten
-        largest_upper_left_neighbors = largest_left_neighbors.map { |n| n.extend_n_times(largest_bottom_neighbors.size-1, 2) }.flatten
-        largest_lower_left_neighbors = largest_left_neighbors.map { |n| n.extend_n_times(largest_bottom_neighbors.size-1, 3) }.flatten
-        largest_all = (largest_right_neighbors + largest_left_neighbors + largest_top_neighbors + largest_bottom_neighbors)  << largest_parent
-        largest_all += (largest_upper_right_neighbors + largest_lower_right_neighbors + largest_upper_left_neighbors + largest_lower_left_neighbors)
-        all_children = []
-        largest_all.each do |parent|
-          if !hash_within_radius?(parent, r)
-            all_children.concat(parent.children_within_radius(r, self.center))
-            largest_all.delete(parent)
-          end
-        end
-        largest_all.concat(all_children)
+        largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point) }.flatten
       end
       
     end

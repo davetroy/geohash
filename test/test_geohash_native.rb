@@ -18,10 +18,10 @@ class GeoHashNativeTest < Test::Unit::TestCase
   end
 
   def test_encoding
-    assert_equal "dqcw4bnrs6s7", encode_base(39.0247389581054, -76.5110040642321, 12)
-    assert_equal "dqcw4bnrs6", encode_base(39.0247389581054, -76.5110040642321, 10)
-    assert_equal "6gkzmg1u", encode_base(-25.427, -49.315, 8)
-    assert_equal "ezs42", encode_base(42.60498046875, -5.60302734375, 5)
+    assert_equal "dqcw4bnrs6s7", encode_base(-76.5110040642321, 39.0247389581054, 12)
+    assert_equal "dqcw4bnrs6", encode_base(-76.5110040642321, 39.0247389581054 , 10)
+    assert_equal "6gkzmg1u", encode_base(-49.315, -25.427,  8)
+    assert_equal "ezs42", encode_base(-5.60302734375, 42.60498046875, 5)
   end
 
   def check_decoding(gh)

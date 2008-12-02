@@ -1,0 +1,14 @@
+=== 1.0.0 / 2008-04-23
+
+  * Released by David Troy (C) Under the MIT License
+
+=== 1.0.1 / 2008-06-11
+
+  * Added decode_bbox functionality for decoding a geohash into a bounding box
+  * Cleaned up test environment
+
+=== 1.1.0 / 2008-11-26
+
+  * Switched to use class vs. module
+  * GeoHash class instances have neighbor and neighbors method
+  * Added GeoHash class method for calculating adjacencies
