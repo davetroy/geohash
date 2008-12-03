@@ -1,6 +1,7 @@
 require 'geohash_native'
 require 'geo_ruby'
-require 'geo_ruby_extensions'
+require 'georuby-extras'
+#require 'geo_ruby_extensions'
 
 module GeoRuby
   module SimpleFeatures
@@ -76,26 +77,8 @@ module GeoRuby
         num
       end
 
-      def neighbors_in_range2(radius)
-        upper_left = GeoHash.new(Point.from_point(Point.from_point(self.point,0,radius),270,radius), value.size)
-        lower_right = GeoHash.new(Point.from_point(Point.from_point(self.point,180,radius),90,radius), value.size)
-        upper_right = GeoHash.new(Point.from_point(Point.from_point(self.point,0,radius),90,radius), value.size)
-        lower_left = GeoHash.new(Point.from_point(Point.from_point(self.point,180,radius),270,radius), value.size)
-        p BASE32
-        puts "ul, ur:"
-        puts upper_left, upper_right
-        next_left = GeoHash.new(GeoHash.calculate_adjacent(upper_left.value, 3))
-
-        puts "lr, ll:"
-        puts lower_right, lower_left
-        cells = [90,270,0,180].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
-        y_axis = cells[2].extend_to(cells[3],3)
-        x_axis = cells[1].extend_to(cells[0],0)
-        y_axis + x_axis
-      end
-      
       def neighbors_in_range(radius)
-        cells = [45,135,225,315].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
+        cells = [45,135,225,315].map { |b| GeoHash.new(self.point.point_at_bearing_and_distance(b,radius), value.size) }
         cells << self
         top_row = cells[3].extend_to(cells[0], 0)
         rows = top_row
@@ -105,7 +88,7 @@ module GeoRuby
           rows.concat(row)
           current_row = row
         end until current_row.first.value == cells[2].value
-        rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
+        rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(self.point.point_at_bearing_and_distance(b,radius), value.size) }
       end
   
       def four_corners
@@ -143,8 +126,8 @@ module GeoRuby
       end
             
       def neighbors_within_radius(r)
-        largest_parent_within_radius(r).neighbors_in_range(r)
-        #largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point) }.flatten
+        #largest_parent_within_radius(r).neighbors_in_range(r)
+        largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point) }.flatten
       end
       
     end
