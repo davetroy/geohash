@@ -108,43 +108,50 @@ module GeoRuby
         rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
       end
   
+      # All four corners of a geohash envelope
       def four_corners
         upper_corner_2 = Point.from_lon_lat(@lower_corner.lon, @upper_corner.lat)
         lower_corner_2 = Point.from_lon_lat(@upper_corner.lon, @lower_corner.lat)
         [@upper_corner, upper_corner_2, @lower_corner, lower_corner_2]
       end
   
+      # All thirty-two child geohashes of a geohash envelope
       def children
         BASE32.scan(/./).map { |digit| GeoHash.new("#{self.value}#{digit}") }
       end
 
-      def children_within_radius(r, from_point=self.center)
+      # All children of a geohash envelope within a radius from the given point;
+      # Keeps going recursively until the given maximum_resolution geohash
+      def children_within_radius(r, from_point=self.center, maximum_resolution=6)
         return [self] if hash_within_radius?(self, r, from_point)
         list = []
         children.each do |child|
           if hash_within_radius?(child, r, from_point)
             list << child
-          elsif @value.size < 6
+          elsif @value.size < maximum_resolution
             list.concat child.children_within_radius(r, from_point)
           end
         end
         list
       end
   
+      # Find the largest parent geohash that is still within the given radius from the center
       def largest_parent_within_radius(r)
         last_parent = nil
         (3..(@value.size-1)).to_a.find { |precision| last_parent = GeoHash.new(self.point,precision); hash_within_radius?(last_parent, r) }
         last_parent
       end
       
+      # Determine if a hash is contained within a radius from the specified point
       def hash_within_radius?(gh, r, from_point=self.point)
         return false if gh.four_corners.find { |p| from_point.ellipsoidal_distance(p) > r }
         true
       end
             
-      def neighbors_within_radius(r)
-        largest_parent_within_radius(r).neighbors_in_range(r)
-        #largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point) }.flatten
+      # Gives a list of all neighbor goehashes within a radius, up to the maximum resolution
+      def neighbors_within_radius(r, maximum_resolution=6)
+        #largest_parent_within_radius(r).neighbors_in_range(r)
+        largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point, maximum_resolution) }.flatten
       end
       
     end
