@@ -28,16 +28,20 @@ module GeoRuby
         @lower_corner, @upper_corner =  points.collect{|point_coords| Point.from_coordinates(point_coords,srid,with_z)}
         @point ||= center
       end
-  
+
+      # Return the geohash string value when representing as string
       def to_s
         @value
       end
     
+      # Does a given geohash envelope contain the specified point?
       def contains?(point)
         ((@lower_corner.x..@upper_corner.x) === point.x) &&
         ((@lower_corner.y..@upper_corner.y) === point.y)
       end
 
+      # Compute a neighbor for a given geohash of the same length
+      # Directions are constants (0,1,2,3 = right, left, top, bottom)
       def neighbor(dir)
         GeoHash.new(GeoHash.calculate_adjacent(@value, dir))
       end
@@ -52,48 +56,20 @@ module GeoRuby
         @neighbors = right_left + top_bottom + diagonals
       end
       
-      def extend_to(geohash, dir)
+      # Keep extending a given geohash in a given direction until we reach a (known) destination geohash
+      # Return a list of the hashes, including the start and destination hashes
+      def extend_to(destination_hash, dir)
         list = [self]
         current = self
         begin
           new_neighbor = GeoHash.new(GeoHash.calculate_adjacent(current.value, dir))
           list << new_neighbor
           current = new_neighbor
-        end until current.value == geohash.value
+        end until current.value == destination_hash.value
         list
       end
       
-      def decimal_value
-        l = @value.size
-        num = 0
-        0.upto(l) do |d|
-          c = @value[l-d-1]
-          digit = BASE32.index(c)
-          decval = digit * (32**d)
-          #puts "#{@value} (#{c}) = #{digit} (#{decval} : 32^#{d})"
-          num += decval
-        end
-        num
-      end
-
-      def neighbors_in_range2(radius)
-        upper_left = GeoHash.new(Point.from_point(Point.from_point(self.point,0,radius),270,radius), value.size)
-        lower_right = GeoHash.new(Point.from_point(Point.from_point(self.point,180,radius),90,radius), value.size)
-        upper_right = GeoHash.new(Point.from_point(Point.from_point(self.point,0,radius),90,radius), value.size)
-        lower_left = GeoHash.new(Point.from_point(Point.from_point(self.point,180,radius),270,radius), value.size)
-        p BASE32
-        puts "ul, ur:"
-        puts upper_left, upper_right
-        next_left = GeoHash.new(GeoHash.calculate_adjacent(upper_left.value, 3))
-
-        puts "lr, ll:"
-        puts lower_right, lower_left
-        cells = [90,270,0,180].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
-        y_axis = cells[2].extend_to(cells[3],3)
-        x_axis = cells[1].extend_to(cells[0],0)
-        y_axis + x_axis
-      end
-      
+      # List of neighbor geohashes within a specified radius
       def neighbors_in_range(radius)
         cells = [45,135,225,315].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
         cells << self
@@ -150,7 +126,6 @@ module GeoRuby
             
       # Gives a list of all neighbor goehashes within a radius, up to the maximum resolution
       def neighbors_within_radius(r, maximum_resolution=6)
-        #largest_parent_within_radius(r).neighbors_in_range(r)
         largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point, maximum_resolution) }.flatten
       end
       
