@@ -1,6 +1,7 @@
 require 'geohash_native'
 require 'geo_ruby'
-require 'geo_ruby_extensions'
+require 'georuby-extras'
+#require 'geo_ruby_extensions'
 
 module GeoRuby
   module SimpleFeatures
@@ -48,12 +49,13 @@ module GeoRuby
   
       # Returns the immediate neighbors of a given hash value,
       # to the same level of precision as the source
-      def neighbors
+      def neighbors(options = {})
         return @neighbors if @neighbors
-        right_left = [0,1].map { |d| neighbor(d) }
-        top_bottom = [2,3].map { |d| neighbor(d) }
-        diagonals = right_left.map { |n| [2,3].map { |d| n.neighbor(d) } }.flatten
+        right_left = [0,1].map { |d| GeoHash.calculate_adjacent(@value, d) }
+        top_bottom = [2,3].map { |d| GeoHash.calculate_adjacent(@value, d) }
+        diagonals = right_left.map { |v| [2,3].map { |d| GeoHash.calculate_adjacent(v, d) } }.flatten
         @neighbors = right_left + top_bottom + diagonals
+        options[:value_only] ? @neighbors : @neighbors.map { |v| GeoHash.new(v) }
       end
       
       # Keep extending a given geohash in a given direction until we reach a (known) destination geohash
@@ -81,7 +83,7 @@ module GeoRuby
           rows.concat(row)
           current_row = row
         end until current_row.first.value == cells[2].value
-        rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
+        rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(self.point.point_at_bearing_and_distance(b,radius), value.size) }
       end
       
       

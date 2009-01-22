@@ -18,7 +18,7 @@ class GeoRubyExtensionsTest < Test::Unit::TestCase
   def test_distance_calcs
     start = Point.from_lon_lat(-76.511, 39.024)
     0.upto(359) do |bearing|
-      dest = Point.from_point(start, bearing, 10000)
+      dest = start.point_at_bearing_and_distance(bearing, 10000)
       assert_in_delta 10000, start.ellipsoidal_distance(dest), 0.00001
     end
   end
