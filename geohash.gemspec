@@ -15,5 +15,5 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README"]
   s.extensions << 'ext/extconf.rb'
   s.extra_rdoc_files = ["Manifest.txt", "README"]
-  s.add_dependency("GeoRuby", ["> 0.0.0"])
+  s.add_dependency("GeoRuby", ["> 1.3.0"])
 end
