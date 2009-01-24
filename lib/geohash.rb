@@ -71,9 +71,9 @@ module GeoRuby
         list
       end
       
-      # List of neighbor geohashes within a specified radius
-      def neighbors_in_range(radius)
-        cells = [45,135,225,315].map { |b| GeoHash.new(self.point.point_at_bearing_and_distance(b,radius), value.size) }
+      # List of same-resolution neighbor geohashes within a specified radius
+      def neighbors_in_range_old(radius)
+        cells = [45,135,225,315].map { |b| GeoHash.new(Point.from_point(self.point,b,radius), value.size) }
         cells << self
         top_row = cells[3].extend_to(cells[0], 0)
         rows = top_row
@@ -84,6 +84,16 @@ module GeoRuby
           current_row = row
         end until current_row.first.value == cells[2].value
         rows.concat [265,270,90,95,85,80,100].map { |b| GeoHash.new(self.point.point_at_bearing_and_distance(b,radius), value.size) }
+      end
+      
+      
+      def neighbors_in_range(radius, from_point, list=[])
+        if hash_within_radius?(self, radius, from_point)
+          list << self
+          [0,1,2,3].map { |d| neighbor(d).neighbors_in_range(radius, from_point, list) }.flatten
+        end
+        p list
+        list
       end
   
       # All four corners of a geohash envelope
@@ -116,7 +126,10 @@ module GeoRuby
       # Find the largest parent geohash that is still within the given radius from the center
       def largest_parent_within_radius(r)
         last_parent = nil
-        (3..(@value.size-1)).to_a.find { |precision| last_parent = GeoHash.new(self.point,precision); hash_within_radius?(last_parent, r) }
+        (@value.size-1).downto(3) do |precision|
+          last_parent = GeoHash.new(self.point,precision)
+          break if radius_within_hash?(last_parent, r)
+        end
         last_parent
       end
       
@@ -125,10 +138,18 @@ module GeoRuby
         return false if gh.four_corners.find { |p| from_point.ellipsoidal_distance(p) > r }
         true
       end
+      
+      # Determine if a hash is contained within a radius from the specified point
+      def radius_within_hash?(gh, r, from_point=self.point)
+        return false if gh.four_corners.find { |p| from_point.ellipsoidal_distance(p) <= r }
+        true
+      end
             
       # Gives a list of all neighbor goehashes within a radius, up to the maximum resolution
       def neighbors_within_radius(r, maximum_resolution=6)
-        largest_parent_within_radius(r).neighbors_in_range(r).map { |parent| parent.children_within_radius(r, self.point, maximum_resolution) }.flatten
+        #.neighbors_in_range(r, self.point)
+        #.map { |parent| parent }.flatten
+        largest_parent_within_radius(r).children_within_radius(r, self.point, maximum_resolution)
       end
       
     end
