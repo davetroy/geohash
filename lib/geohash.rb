@@ -8,25 +8,25 @@ module GeoRuby
     class GeoHash < Envelope
   
       extend GeoHashNative
-      attr_reader :value, :point
+      attr_reader :value, :point, :height
 
       BASE32="0123456789bcdefghjkmnpqrstuvwxyz"
   
       # Create new geohash from a Point, String, or Array of Latlon
       def initialize(*params)
         if (params.first.is_a?(Point))
-          point, precision = params
-          @value = GeoHash.encode_base(point.x, point.y, precision || 10)
-          @point = point
+          @point, precision, @height = params
+          @value = GeoHash.encode_base(@point.x, @point.y, precision || 10)
         elsif (params.first.is_a?(String))
-          @value = params.first
+          @value, @height = params
         elsif (params.size>=2 && params[0].is_a?(Float) && params[1].is_a?(Float))
-          precision = params[2] || 10
-          @value = GeoHash.encode_base(params[0], params[1], precision)
-          @point = Point.from_lon_lat(params[0], params[1])
+          lon, lat, precision, @height = params
+          @value = GeoHash.encode_base(lon, lat, precision || 10)
+          @point = Point.from_lon_lat(lon, lat)
         end
         points = GeoHash.decode_bbox(@value)
-        @lower_corner, @upper_corner =  points.collect{|point_coords| Point.from_coordinates(point_coords,srid,with_z)}
+        @lower_corner, @upper_corner =  points.collect{|point_coords| Point.from_coordinates(point_coords,nil,nil)}
+        @height = 0 unless @height.is_a?(Numeric)
         @point ||= center
       end
 
