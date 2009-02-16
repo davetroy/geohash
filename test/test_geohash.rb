@@ -22,19 +22,32 @@ class GeoHashTest < Test::Unit::TestCase
     assert_equal ["dqctfzy","dqctfzz","dqcw4bp","dqcw4bq","dqcw4br","dqcw4bj","dqctfzv","dqcw4bm"].to_set, neighbor_hashes.to_set
   end
   
+  def test_n_neighbors
+    gh = GeoHash.new(-76.511,39.024,7)
+    right_neighbors = gh.n_neighbors(0, 4).map(&:value)
+    assert_equal 4, right_neighbors.size
+  end
+  
+  def test_surrounding_matrix
+    gh = GeoHash.new(-76.511,39.024,7)
+    matrix = gh.surrounding_matrix(9)
+    assert_equal 81, matrix.size
+    p matrix.map(&:value).sort
+  end
+  
   def test_contains
     p1 = GeoHash.new("dqcw4bn7k2")
     p2 = GeoHash.new("dqcw4")
     assert p2.contains?(p1.center)
   end
   
-  def test_largest_parent
-    gh = GeoHash.new(-76.511, 39.024, 10)
-    assert_equal "dqcw4b", gh.largest_parent_within_radius(1000).to_s
-    assert_equal "dqcw4", gh.largest_parent_within_radius(10000).to_s
-    assert_equal "dqcw", gh.largest_parent_within_radius(100000).to_s
-    assert_equal "dqc", gh.largest_parent_within_radius(200000).to_s
-  end
+  # def test_largest_parent
+  #   gh = GeoHash.new(-76.511, 39.024, 10)
+  #   assert_equal "dqcw4b", gh.largest_parent_within_radius(1000).to_s
+  #   assert_equal "dqcw4", gh.largest_parent_within_radius(10000).to_s
+  #   assert_equal "dqcw", gh.largest_parent_within_radius(100000).to_s
+  #   assert_equal "dqc", gh.largest_parent_within_radius(200000).to_s
+  # end
   
   def test_neighbors_within_radius
     gh = GeoHash.new(-76.511, 39.024, 9)

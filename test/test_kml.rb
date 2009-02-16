@@ -17,9 +17,13 @@ end
 include GeoRuby::SimpleFeatures
   
 gh = GeoHash.new(-76.511, 39.024, 6)
-@matrix = gh.neighbors_within_radius(14000)
+#@matrix = gh.neighbors_within_radius(14000)
 #@matrix = gh.children_within_radius(2500)
 #@matrix = gh.neighbors_in_range(8000)
+gh = GeoHash.new(-76.511,39.024,7)
+#@matrix = gh.surrounding_matrix(9)
+cell_centers = gh.all_nth_neighbors(3) << gh
+@matrix = cell_centers.map { |c| [c, c.neighbors] }.flatten
 
 File.open("./foo.kml", 'w') do |f|
   xml = Builder::XmlMarkup.new(:target => f, :indent => 1)

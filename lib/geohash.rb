@@ -46,7 +46,43 @@ module GeoRuby
       def neighbor(dir)
         GeoHash.new(GeoHash.calculate_adjacent(@value, dir))
       end
-  
+
+      # Returns the nth neighbor in a given direction
+      def nth_neighbor(dir, n)
+        last_value = GeoHash.calculate_adjacent(@value, dir)
+        1.upto(n-1) do 
+          last_value = GeoHash.calculate_adjacent(last_value, dir)
+        end
+        GeoHash.new(last_value)
+      end
+      
+      # The set of all neighboring cells in a given direction, including diagonal
+      def all_nth_neighbors(offset)
+        right_left = [0,1].map { |d| nth_neighbor(d, offset) }.flatten
+        top_bottom = [2,3].map { |d| nth_neighbor(d, offset) }.flatten
+        upper_lower_right_left = right_left.map { |n| [2,3].map {|d| n.nth_neighbor(d, offset) } }
+        (right_left + top_bottom + upper_lower_right_left).flatten
+      end
+      
+      # Gives N neighbors of a given geohash in a given direction
+      def n_neighbors(dir, qty)
+        result = []
+        result << neighbor(dir)
+        1.upto(qty-1) do
+          result << result.last.neighbor(dir)
+        end
+        result
+      end
+      
+      # Returns the matrix surrounding a given geohash
+      def surrounding_matrix(n)
+        n = (n-1)/2
+        right_left = [0,1].map { |d| n_neighbors(d, n) }.flatten
+        right_left << self
+        top_bottom = right_left.map { |gh| [2,3].map { |d| gh.n_neighbors(d,n) } }.flatten
+        right_left + top_bottom
+      end
+
       # Returns the immediate neighbors of a given hash value,
       # to the same level of precision as the source
       def neighbors(options = {})
