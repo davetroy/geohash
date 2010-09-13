@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
     s.files = Dir.glob('lib/**/*')
     s.platform = 'java'
   else
-    s.files = Dir.glob('ext/*') + Dir.glob('lib/**/*.rb')
+    s.files = Dir.glob('ext/*') + ['lib/geohash.rb']
     s.platform = Gem::Platform::RUBY
     s.extensions << 'ext/extconf.rb'
   end
