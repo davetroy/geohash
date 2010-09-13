@@ -1,4 +1,8 @@
-require 'geohash_native'
+begin
+  require 'geohash_native'
+rescue LoadError => e
+  require File.expand_path('../geohash_java', __FILE__)
+end
 
 class Float
   def decimals(places)
