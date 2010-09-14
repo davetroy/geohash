@@ -1,6 +1,6 @@
 // geohash-native.c
-// (c) 2008 David Troy
-// dave@roundhousetech.com
+// (c) 2008-2010 David Troy
+// davetroy@gmail.com
 // 
 // (The MIT License)
 // 
