@@ -120,7 +120,7 @@ static VALUE encode(VALUE self, VALUE lat, VALUE lon, VALUE precision)
 	if (digits <3 || digits > 12)
 		digits = 12;
 	
-	encode_geohash(RFLOAT(lat)->value, RFLOAT(lon)->value, digits, str);
+	encode_geohash(RFLOAT(lat)->float_value, RFLOAT(lon)->float_value, digits, str);
 
 	geohash = rb_str_new2(str);
 	return geohash;
@@ -132,7 +132,7 @@ static VALUE decode_bbox(VALUE self, VALUE str)
 	double lat[2], lon[2];
 	Check_Type(str, T_STRING);
 
-	decode_geohash_bbox(RSTRING(str)->ptr, lat, lon);
+	decode_geohash_bbox(RSTRING_PTR(str), lat, lon);
 
 	ret = rb_ary_new2(2); /* [[lat[0], lon[0]], [lat[1], lon[1]]] */
 
@@ -155,7 +155,7 @@ static VALUE decode(VALUE self, VALUE str)
 	double point[2];
 	Check_Type(str, T_STRING);
 	
-	decode_geohash(RSTRING(str)->ptr, point);
+	decode_geohash(RSTRING_PTR(str), point);
 	
 	ary = rb_ary_new2(2);
 	rb_ary_store(ary, 0, rb_float_new(point[0]));
@@ -193,10 +193,10 @@ static VALUE calculate_adjacent(VALUE self, VALUE geohash, VALUE dir)
 	VALUE ret_val;
 	Check_Type(geohash, T_STRING);
 	Check_Type(dir, T_FIXNUM);
-	str = RSTRING(geohash)->ptr;
+	str = RSTRING_PTR(geohash);
 	if (!strlen(str)) return Qnil;
 	ret_val = rb_str_new(str,strlen(str));
-	get_neighbor(RSTRING(ret_val)->ptr, NUM2INT(dir), strlen(str));
+	get_neighbor(RSTRING_PTR(ret_val), NUM2INT(dir), strlen(str));
 	return ret_val;
 }
 
