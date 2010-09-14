@@ -4,8 +4,8 @@
 
 == DESCRIPTION:
 
-GeoHash Gem for Ruby (c) 2008 David Troy
-dave@roundhousetech.com
+GeoHash Gem for Ruby (c) 2008-2010 David Troy
+davetroy@gmail.com
 
 Geohash is a latitude/longitude encoding system invented by Gustavo Niemeyer when writing the
 web service at geohash.org, and put into the public domain. Geohashes offer properties like
@@ -69,7 +69,7 @@ Have fun with this!  GeoHash is the new black.
 
 (The MIT License)
 
-Copyright (c) 2008 David Troy, Roundhouse Technologies LLC
+Copyright (c) 2008-2010 David Troy
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
