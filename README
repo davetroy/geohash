@@ -1,3 +1,7 @@
+NOTE: this is not maintained. Recommend checking out other gems such as this one:
+https://rubygems.org/gems/dynamodb_geo
+
+---
 = geohash
 
 * http://rubyforge.org/projects/geohash
